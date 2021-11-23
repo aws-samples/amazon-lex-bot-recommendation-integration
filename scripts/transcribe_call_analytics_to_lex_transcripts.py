@@ -134,7 +134,7 @@ def main():
 
         print('[IN PROGRESS] Successfully transformed [{0}] keys'.format(processed_keys))
 
-    print('[COMPLETE] Successfully stitched [{0}] keys'.format(processed_keys))
+    print('[COMPLETE] Successfully transformed [{0}] keys'.format(processed_keys))
 
 
 if __name__ == '__main__':
