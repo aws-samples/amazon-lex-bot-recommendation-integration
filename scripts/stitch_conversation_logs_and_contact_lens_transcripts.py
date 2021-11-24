@@ -28,22 +28,21 @@ import boto3
 
 
 def main():
-    arg_parser = argparse.ArgumentParser(description='Read Contact Lens transcripts from a configured S3 bucket, '
-                                                     'look-up corresponding Lex conversation logs from a configured '
-                                                     'CloudWatch Logs ARN, stitch them together and upload it into the '
-                                                     'same S3 bucket under a new path'
-                                                     'S3 bucket.')
-    arg_parser.add_argument('--source', required=True, type=str, help="Set the source S3 bucket containing Contact "
+    arg_parser = argparse.ArgumentParser(description='Read Contact Lens transcripts from a configured Amazon S3 bucket, '
+                                                     'look-up corresponding Amazon Lex conversation logs from a configured '
+                                                     'Amazon CloudWatch Logs ARN, stitch them together and upload it into the '
+                                                     'same Amazon S3 bucket under a new path.')
+    arg_parser.add_argument('--source', required=True, type=str, help="Set the source Amazon S3 bucket containing Contact "
                                                                       "Lens transcripts")
     arg_parser.add_argument('--access_key', required=False, type=str,
                             help="Access key of the credentials needed to query "
-                                 "S3 and CloudWatch")
+                                 "Amazon S3 and Amazon CloudWatch")
     arg_parser.add_argument('--secret_key', required=False, type=str,
                             help="Secret key of the credentials needed to query "
-                                 "S3 and CloudWatch")
+                                 "Amazon S3 and Amazon CloudWatch")
     arg_parser.add_argument('--region', required=True, help="Specify the region. This flag is required")
-    arg_parser.add_argument('--cloudwatch_log_group_name', required=True, help="Specify the CloudWatch Log Group name "
-                                                                               "containing the Lex Conversation Logs")
+    arg_parser.add_argument('--cloudwatch_log_group_name', required=True, help="Specify the Amazon CloudWatch Log Group name "
+                                                                               "containing the Amazon Lex Conversation Logs")
 
     arg = arg_parser.parse_args()
     source = arg.source
@@ -66,7 +65,7 @@ def main():
     processed_keys = 0
     matched_keys = 0
 
-    # Call S3 ListObjects to fetch all the keys in the bucket.
+    # Call Amazon S3 ListObjects to fetch all the keys in the bucket.
     while more_keys_left:
         if continuation_token:
             s3_objects = s3_client.list_objects_v2(Bucket=source,
@@ -76,7 +75,7 @@ def main():
             s3_objects = s3_client.list_objects_v2(Bucket=source,
                                                    Prefix='Analysis/')
 
-        # For each S3 object, attempt performing the transformation.
+        # For each Amazon S3 object, attempt to perform the transformation.
         for s3_object in s3_objects.get('Contents'):
             if s3_object.get('Key').endswith('.json'):
                 # Retrieve the object and read the file.
@@ -84,7 +83,7 @@ def main():
                                                Key=s3_object.get('Key'))
                 data = s3_file.get('Body').read().decode('utf-8')
 
-                # Transform the file by appending Lex Conversation Logs, if any is present.
+                # Transform the file by appending Amazon Lex Conversation Logs, if any is present.
                 updated_data, found_match = stitch_conversation_logs(data,
                                                                      s3_object.get('Key'),
                                                                      cloudwatch_log_group_name,
@@ -100,7 +99,7 @@ def main():
 
                 if found_match:
                     # Keep track of how many of those Contact Lens files were successfully matched and stitched with
-                    # Lex Conversation Logs.
+                    # Amazon Lex Conversation Logs.
                     matched_keys = matched_keys + 1
 
         # If more results are available, continue pagination.
@@ -126,13 +125,13 @@ def stitch_conversation_logs(data,
     utc_time = parser.parse(conversation_timestamp)
     epoch_time = int(utc_time.timestamp() * 1000)
 
-    # Lex Conversation Logs use the Connect Contact ID as the Session ID. Attempt to find any matching logs.
+    # Amazon Lex Conversation Logs use the Amazon Connect Contact ID as the Session ID. Attempt to find any matching logs.
     lex_logs, found_match = get_cloudwatch_logs(cloudwatch_log_group_name,
                                                 cloudwatch_client,
                                                 epoch_time,
                                                 contact_id)
 
-    # Reverse the list of Lex logs (ordered by time) and add each to the top of the list of transcripts.
+    # Reverse the list of Amazon Lex logs (ordered by time) and add each to the top of the list of transcripts.
     lex_logs.reverse()
     for lex_log in lex_logs:
         lex_json = json.loads(lex_log)
@@ -178,7 +177,7 @@ def get_cloudwatch_logs(cloudwatch_log_group_name, cloudwatch_client, epoch_time
                 filterPattern='"' + contact_id + '"',
                 endTime=epoch_time + (1 * 60 * 60 * 1000))
 
-        # For each matching CloudWatch Log Entry, fetch the message part of the Conversation Logs.
+        # For each matching Amazon CloudWatch Log Entry, fetch the message part of the Conversation Logs.
         for event in response.get('events'):
             lex_logs.append(event.get('message'))
 
@@ -192,7 +191,7 @@ def get_cloudwatch_logs(cloudwatch_log_group_name, cloudwatch_client, epoch_time
         found_match = True
 
     if not found_match:
-        print('[IN PROGRESS] Did not find any matching Lex Conversation Logs for contact ID ' + contact_id)
+        print('[IN PROGRESS] Did not find any matching Amazon Lex Conversation Logs for contact ID ' + contact_id)
 
     return lex_logs, found_match
 
