@@ -11,8 +11,8 @@ python3 stitch_conversation_logs_and_contact_lens_transcripts.py --source my-con
 ```
 
 1. **source**: This refers to the Amazon S3 bucket containing the original Contact Lens transcripts.
-2. **access_key**: Access key of the IAM credentials to be used by this script. The credentials require access to Amazon S3 (read/write) and Amazon CloudWatch (read).
-3. **secret_key**: Secret key of the IAM credentials to be used by this script. The credentials require access to Amazon S3 (read/write) and Amazon CloudWatch (read).
+2. **access_key**: Access key of the AWS IAM credentials to be used by this script. The credentials require access to Amazon S3 (read/write) and Amazon CloudWatch (read).
+3. **secret_key**: Secret key of the AWS IAM credentials to be used by this script. The credentials require access to Amazon S3 (read/write) and Amazon CloudWatch (read).
 4. **region**: The region in which the Amazon S3 Bucket and Amazon CloudWatch Log Group are present.
 5. **cloudwatch_log_group_name**: The Amazon CloudWatch Log Group containing the Amazon Lex Conversation Logs.
 
@@ -27,8 +27,8 @@ python3 transcribe_call_analytics_to_lex_transcripts.py --source my-transcribe-c
 ```
 
 1. **source**: This refers to the Amazon S3 bucket containing the original Amazon Transcribe Call Analytics transcripts.
-2. **access_key**: Access key of the IAM credentials to be used by this script. The credential requires access to Amazon S3 (read/write).
-3. **secret_key**: Secret key of the IAM credentials to be used by this script. The credential requires access to Amazon S3 (read/write).
+2. **access_key**: Access key of the AWS IAM credentials to be used by this script. The credential requires access to Amazon S3 (read/write).
+3. **secret_key**: Secret key of the AWS IAM credentials to be used by this script. The credential requires access to Amazon S3 (read/write).
 4. **region**: The region in which the Amazon S3 Bucket and Amazon CloudWatch Log Group are present.
 5. **target**: This refers to the Amazon S3 bucket that should contain the output transcripts in the Amazon Lex Input Format.
 
