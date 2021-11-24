@@ -71,12 +71,12 @@ def convert_to_contact_lens_format(call_analytics_json):
 
 
 def main():
-    arg_parser = argparse.ArgumentParser(description='Read Amazon Transcribe Call Analytics transcripts from a configured S3 '
+    arg_parser = argparse.ArgumentParser(description='Read Amazon Transcribe Call Analytics transcripts from a configured Amazon S3 '
                                                      'bucket, convert it into the Amazon Lex/Contact Lens transcript format  '
-                                                     'and upload it into a different S3 bucket.')
-    arg_parser.add_argument('--source', required=True, type=str, help="Set the source S3 bucket containing Amazon Transcribe "
+                                                     'and upload it into a different Amazon S3 bucket.')
+    arg_parser.add_argument('--source', required=True, type=str, help="Set the source Amazon S3 bucket containing Amazon Transcribe "
                                                                       "Call Analytics transcripts")
-    arg_parser.add_argument('--target', required=True, type=str, help="Set the target S3 bucket to upload the Amazon Lex "
+    arg_parser.add_argument('--target', required=True, type=str, help="Set the target Amazon S3 bucket to upload the Amazon Lex "
                                                                       "transcripts")
     arg_parser.add_argument('--access_key', required=False, type=str,
                             help="Access key of the credentials needed to query Amazon S3")
