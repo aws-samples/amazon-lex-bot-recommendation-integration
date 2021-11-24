@@ -28,7 +28,7 @@ import boto3
 
 def get_random_time():
     TIME_STRING_FORMAT = '%02d:%02d:%02d'
-    # generate random number scaled to number of seconds in a day: (24*60*60) = 86,400
+    # Generate random number scaled to number of seconds in a day: (24*60*60) = 86,400
     time = int(random.random() * 86400)
     hours = int(time / 3600)
     minutes = int((time - hours * 3600) / 60)
@@ -71,17 +71,17 @@ def convert_to_contact_lens_format(call_analytics_json):
 
 
 def main():
-    arg_parser = argparse.ArgumentParser(description='Read Transcribe Call Analytics transcripts from a configured S3 '
-                                                     'bucket, convert it into the Lex/Contact Lens transcript format  '
+    arg_parser = argparse.ArgumentParser(description='Read Amazon Transcribe Call Analytics transcripts from a configured S3 '
+                                                     'bucket, convert it into the Amazon Lex/Contact Lens transcript format  '
                                                      'and upload it into a different S3 bucket.')
-    arg_parser.add_argument('--source', required=True, type=str, help="Set the source S3 bucket containing Transcribe "
+    arg_parser.add_argument('--source', required=True, type=str, help="Set the source S3 bucket containing Amazon Transcribe "
                                                                       "Call Analytics transcripts")
-    arg_parser.add_argument('--target', required=True, type=str, help="Set the target S3 bucket to upload the Lex "
+    arg_parser.add_argument('--target', required=True, type=str, help="Set the target S3 bucket to upload the Amazon Lex "
                                                                       "transcripts")
     arg_parser.add_argument('--access_key', required=False, type=str,
-                            help="Access key of the credentials needed to query S3")
+                            help="Access key of the credentials needed to query Amazon S3")
     arg_parser.add_argument('--secret_key', required=False, type=str,
-                            help="Secret key of the credentials needed to query S3")
+                            help="Secret key of the credentials needed to query Amazon S3")
     arg_parser.add_argument('--region', required=True, help="Specify the region. This flag is required")
 
     arg = arg_parser.parse_args()
@@ -100,7 +100,7 @@ def main():
     continuation_token = None
     processed_keys = 0
 
-    # Call S3 ListObjects to fetch all the keys in the bucket.
+    # Call Amazon S3 ListObjects to fetch all the keys in the bucket.
     while more_keys_left:
         if continuation_token:
             s3_objects = s3_client.list_objects_v2(Bucket=source,
@@ -108,7 +108,7 @@ def main():
         else:
             s3_objects = s3_client.list_objects_v2(Bucket=source)
 
-        # For each S3 object, attempt performing the transformation.
+        # For each Amazon S3 object, attempt performing the transformation.
         for s3_object in s3_objects.get('Contents'):
             if s3_object.get('Key').endswith('.json'):
                 # Retrieve the object and read the file.
