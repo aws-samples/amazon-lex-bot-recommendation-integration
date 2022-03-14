@@ -21,14 +21,15 @@ import datetime
 import json
 import random
 import sys
-import uuid
 
 import boto3
 
+DATE_CHARACTERS = 10
+TIME_CHARACTERS = 8
 
 def get_random_time():
     TIME_STRING_FORMAT = '%02d:%02d:%02d'
-    # Generate a random number scaled to the number of seconds in a day    
+    # Generate a random number scaled to the number of seconds in a day
     time = int(random.random() * 86400)
     hours = int(time / 3600)
     minutes = int((time - hours * 3600) / 60)
@@ -36,48 +37,56 @@ def get_random_time():
     return TIME_STRING_FORMAT % (hours, minutes, seconds)
 
 
-def convert_to_contact_lens_format(call_analytics_json):
-    cur_json = dict()
-    cur_json['ContentMetadata'] = call_analytics_json['ContentMetadata']
-    if 'RedactionTypes' not in cur_json['ContentMetadata']:
-        cur_json['ContentMetadata']['RedactionTypes'] = None
-    cur_json['CustomerMetadata'] = dict()
-    cur_str = str(int(random.random() * 10000))
-    cur_uuid = uuid.uuid4()
-    cur_json['CustomerMetadata']['ContactId'] = '{}-{}'.format(cur_str, cur_uuid)
-    cur_json['Participants'] = list()
+def convert_to_contact_lens_format(connect_chat_json):
+    contact_lens_json = dict()
+    contact_lens_json['ContentMetadata'] = dict()
+    contact_lens_json['ContentMetadata']['Output'] = 'Raw'
+    contact_lens_json['ContentMetadata']['RedactionTypes'] = None
 
-    for index in range(len(call_analytics_json['Participants'])):
-        cur_json['Participants'].append(
-            {'ParticipantId': index + 1,
-             'ParticipantRole': call_analytics_json['Participants'][index]['ParticipantRole']})
+    contact_lens_json['CustomerMetadata'] = dict()
+    contact_lens_json['CustomerMetadata']['ContactId'] = connect_chat_json['ContactId']
 
-    participant_role_to_id = dict()
-    for entry in cur_json['Participants']:
-        participant_role_to_id[entry['ParticipantRole']] = entry['ParticipantId']
+    contact_lens_json['Version'] = '1.1.0'
+    contact_lens_json['Transcript'] = list()
+    contact_lens_json['Participants'] = list()
 
-    cur_json['Version'] = '1.1.0'
-    cur_json['Transcript'] = list()
+    for transcript in connect_chat_json['Transcript']:
+        if transcript['ContentType'] == 'text/plain':
+            contact_lens_transcript = dict()
+            contact_lens_transcript['ParticipantId'] = transcript['ParticipantId']
+            contact_lens_transcript['Id'] = transcript['Id']
+            contact_lens_transcript['Content'] = transcript['Content']
+            contact_lens_json['Transcript'].append(contact_lens_transcript)
 
-    for transcript in call_analytics_json['Transcript']:
-        cur_transcript = dict()
-        cur_transcript['Id'] = transcript['Id']
-        cur_transcript['Content'] = transcript['Content']
-        cur_transcript['ParticipantId'] = participant_role_to_id[transcript['ParticipantRole']]
-        cur_json['Transcript'].append(cur_transcript)
-    today = datetime.date.today()
-    file_name = '{}_analysis_{}_T{}Z.json'.format(cur_str, today.strftime('%Y-%m-%d'), get_random_time())
-    return file_name, cur_json
+            participant = dict()
+            participant['ParticipantId'] = transcript['ParticipantId']
+            if transcript['ParticipantRole'] == 'SYSTEM':
+                participant['ParticipantRole'] = 'AGENT'
+            else:
+                participant['ParticipantRole'] = transcript['ParticipantRole']
+            if participant not in contact_lens_json['Participants']:
+                contact_lens_json['Participants'].append(participant)
+
+    if len(connect_chat_json['Transcript']) > 0:
+        date = connect_chat_json['Transcript'][0]['AbsoluteTime'][:DATE_CHARACTERS]
+        time = connect_chat_json['Transcript'][0]['AbsoluteTime'][DATE_CHARACTERS + 1:DATE_CHARACTERS + 1 + TIME_CHARACTERS]
+        file_name = '{}_analysis_{}_T{}Z.json'.format(contact_lens_json['CustomerMetadata']['ContactId'], date, time)
+    else:
+        today = datetime.date.today()
+        file_name = '{}_analysis_{}_T{}Z.json'.format(contact_lens_json['CustomerMetadata']['ContactId'],
+                                                      today.strftime('%Y-%m-%d'), get_random_time())
+
+    return file_name, contact_lens_json
 
 
 def main():
-    arg_parser = argparse.ArgumentParser(description='Read Amazon Transcribe Call Analytics transcripts from a configured Amazon S3 '
-                                                     'bucket, convert them into the Amazon Lex/Contact Lens transcript format  '
-                                                     'and, upload them into a different Amazon S3 bucket.')
-    arg_parser.add_argument('--source', required=True, type=str, help="Set the source Amazon S3 bucket containing Amazon Transcribe "
-                                                                      "Call Analytics transcripts")
-    arg_parser.add_argument('--target', required=True, type=str, help="Set the target Amazon S3 bucket to upload the Amazon Lex "
-                                                                      "transcripts")
+    arg_parser = argparse.ArgumentParser(description='Read Amazon Connect chat transcripts from a configured Amazon S3 '
+                                                     'bucket, convert them into the Amazon Lex/Contact Lens transcript '
+                                                     'format, and upload them into a different Amazon S3 bucket.')
+    arg_parser.add_argument('--source', required=True, type=str, help="Set the source Amazon S3 bucket containing "
+                                                                      "Amazon Connect Chat transcripts")
+    arg_parser.add_argument('--target', required=True, type=str, help="Set the target Amazon S3 bucket to upload the "
+                                                                      "Amazon Lex transcripts")
     arg_parser.add_argument('--access_key', required=False, type=str,
                             help="Access key of the credentials needed to query Amazon S3")
     arg_parser.add_argument('--secret_key', required=False, type=str,
@@ -114,10 +123,10 @@ def main():
                 # Retrieve the object and read the file.
                 s3_file = s3_client.get_object(Bucket=source,
                                                Key=s3_object.get('Key'))
-                call_analytics_json = s3_file.get('Body').read().decode('utf-8')
+                connect_chat_json = s3_file.get('Body').read().decode('utf-8')
 
                 # Transform the file to the Contact Lens format.
-                file_name, contact_lens_json = convert_to_contact_lens_format(json.loads(call_analytics_json))
+                file_name, contact_lens_json = convert_to_contact_lens_format(json.loads(connect_chat_json))
 
                 # Upload the object back into the original bucket under a new path.
                 s3_client.put_object(Bucket=target,
