@@ -39,7 +39,7 @@ This script helps convert output transcripts from Amazon Connect Chat into the r
 #### Usage
 
 ```
-python3 transcribe_connect_chat_to_lex_transcripts.py --source my-connect-chat-bucket --access_key MYACCESSKEY --secret_key MYSECRETKEY --region us-west-2 --target my-lex-transcripts-bucket
+python3 connect_chat_to_lex_transcripts.py --source my-connect-chat-bucket --access_key MYACCESSKEY --secret_key MYSECRETKEY --region us-west-2 --target my-lex-transcripts-bucket
 ```
 
 1. **source**: The Amazon S3 bucket that contains the original Amazon Connect Chat transcripts.
