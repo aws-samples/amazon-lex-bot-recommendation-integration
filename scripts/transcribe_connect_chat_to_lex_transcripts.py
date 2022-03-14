@@ -29,7 +29,7 @@ TIME_CHARACTERS = 8
 
 def get_random_time():
     TIME_STRING_FORMAT = '%02d:%02d:%02d'
-    # Generate random number scaled to number of seconds in a day: (24*60*60) = 86,400
+    # Generate a random number scaled to the number of seconds in a day
     time = int(random.random() * 86400)
     hours = int(time / 3600)
     minutes = int((time - hours * 3600) / 60)
@@ -81,8 +81,8 @@ def convert_to_contact_lens_format(connect_chat_json):
 
 def main():
     arg_parser = argparse.ArgumentParser(description='Read Amazon Connect chat transcripts from a configured Amazon S3 '
-                                                     'bucket, convert it into the Amazon Lex/Contact Lens transcript '
-                                                     'format and upload it into a different Amazon S3 bucket.')
+                                                     'bucket, convert them into the Amazon Lex/Contact Lens transcript '
+                                                     'format, and upload them into a different Amazon S3 bucket.')
     arg_parser.add_argument('--source', required=True, type=str, help="Set the source Amazon S3 bucket containing "
                                                                       "Amazon Connect Chat transcripts")
     arg_parser.add_argument('--target', required=True, type=str, help="Set the target Amazon S3 bucket to upload the "
