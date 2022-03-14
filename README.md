@@ -29,7 +29,23 @@ python3 transcribe_call_analytics_to_lex_transcripts.py --source my-transcribe-c
 1. **source**: This refers to the Amazon S3 bucket containing the original Amazon Transcribe Call Analytics transcripts.
 2. **access_key**: Access key of the AWS IAM credentials to be used by this script. The credential requires access to Amazon S3 (read/write).
 3. **secret_key**: Secret key of the AWS IAM credentials to be used by this script. The credential requires access to Amazon S3 (read/write).
-4. **region**: The region in which the Amazon S3 Bucket and Amazon CloudWatch Log Group are present.
+4. **region**: The region in which the Amazon S3 Buckets are present.
+5. **target**: This refers to the Amazon S3 bucket that should contain the output transcripts in the Amazon Lex Input Format.
+
+### Convert Amazon Connect Chat Transcripts to Amazon Lex Bot Recommendation Input Format
+
+This script helps convert output transcripts from Amazon Connect Chat into the required input format for the Amazon Lex Bot Recommendation APIs.
+
+#### Usage
+
+```
+python3 transcribe_connect_chat_to_lex_transcripts.py --source my-transcribe-call-analytics-bucket --access_key MYACCESSKEY --secret_key MYSECRETKEY --region us-west-2 --target my-lex-transcripts-bucket
+```
+
+1. **source**: This refers to the Amazon S3 bucket containing the original Amazon Connect Chat transcripts.
+2. **access_key**: Access key of the AWS IAM credentials to be used by this script. The credential requires access to Amazon S3 (read/write).
+3. **secret_key**: Secret key of the AWS IAM credentials to be used by this script. The credential requires access to Amazon S3 (read/write).
+4. **region**: The region in which the Amazon S3 Buckets are present.
 5. **target**: This refers to the Amazon S3 bucket that should contain the output transcripts in the Amazon Lex Input Format.
 
 ## Security
